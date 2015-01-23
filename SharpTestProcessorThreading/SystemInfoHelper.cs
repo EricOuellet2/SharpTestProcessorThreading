@@ -18,7 +18,7 @@ namespace SystemProcessorInfo
 		Summing up the NumberOfLogicalProcessors property of the Win32_Processor object will given you the other side of the calculation – namely how many logical processors are present in the system.
 		In order to keep the one line of code as short as possible – I have used every PowerShell abbreviation that I know of (gwmi for Get-WMIObject, –ns for –namespace, measure for measure-object, –p for –property, –f for –foregroundColor)
 	 */
-
+	 
 	public class SystemInfoHelper
 	{
 		public static int GetWmiPhysicalProcessorCount()
