@@ -1,0 +1,72 @@
+﻿<Window xmlns:ribbon="http://schemas.actiprosoftware.com/winfx/xaml/ribbon"  
+		x:Class="SystemProcessorInfo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:systemProcessorInfo="clr-namespace:SystemProcessorInfo"
+        Title="MainWindow" Height="350" Width="480">
+	
+	<Window.Resources>
+		<Style TargetType="TextBlock">
+			<Setter Property="Margin" Value="0,3,0,7"></Setter>
+		</Style>
+	</Window.Resources>
+
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition></RowDefinition>
+			<RowDefinition Height="Auto"></RowDefinition>
+		</Grid.RowDefinitions>
+
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+			</Grid.RowDefinitions>
+
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition></ColumnDefinition>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+			</Grid.ColumnDefinitions>
+
+			<TextBlock Grid.Row="0" Grid.Column="0" >Processor count (WMI)</TextBlock>
+			<TextBlock Grid.Row="1" Grid.Column="0" >Global core count (WMI)</TextBlock>
+			<TextBlock Grid.Row="2" Grid.Column="0" >Global logical processors (WMI)</TextBlock>
+			<TextBlock Grid.Row="3" Grid.Column="0" >Global logical processors (Environment.LogicalProcessorCount)</TextBlock>
+			<TextBlock Grid.Row="4" Grid.Column="0" >Processor group count (pinvoke kernel32)")</TextBlock>
+
+			<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding WmiProcessorCount}"></TextBlock>
+			<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding WmiGlobalCoreCount}" ></TextBlock>
+			<TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding WmiLogicalProcessorCount}"></TextBlock>
+			<TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding CSharpEnvironmentLogicalProcessorCount}"></TextBlock>
+			<TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ProcessorGroupCount}"></TextBlock>
+
+		</Grid>
+
+		<Grid Grid.Row="1" Grid.ColumnSpan="2">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition></ColumnDefinition>
+			</Grid.ColumnDefinitions>
+
+			
+			<TextBlock Grid.Column="0">Run: </TextBlock>
+			<TextBox Grid.Column="1" MinWidth="60" Name="TextBoxThreadCount" VerticalAlignment="Top" >80</TextBox>
+			<TextBlock Grid.Column="2">threads for:</TextBlock>
+			<TextBox Grid.Column="3" MinWidth="60" Name="TextBoxSeconds" VerticalAlignment="Top" >15</TextBox>
+			<TextBlock Grid.Column="4">seconds.</TextBlock>
+			<Button Grid.Column="5" Margin="5,0,5,0" Name="CmdStartThreads" VerticalAlignment="Top" Click="CmdStartThreadsClick">Go!</Button>
+			<CheckBox Grid.Column="6" Name="CheckBoxTestThreadPool">
+				<TextBlock TextWrapping="Wrap" Text="Instantiate from thread pool (vs normal thread creation)"></TextBlock></CheckBox>
+		</Grid>
+
+	</Grid>
+</Window>
