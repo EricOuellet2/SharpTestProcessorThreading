@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SystemProcessorInfo
@@ -13,12 +14,15 @@ namespace SystemProcessorInfo
 		public int WmiGlobalCoreCount { get; private set; }
 		public int WmiLogicalProcessorCount { get; private set; }
 		public int CSharpEnvironmentLogicalProcessorCount{ get; private set; }
+		public int NumaHighestNodeNumber { get; private set; }
 		public int ProcessorGroupCount { get; private set; }
-
+		public int ThreadPoolMaxThreadsCountWorkerThreads { get; private set; }
+		public int ThreadPoolMaxThreadsCountCompletionPortThreads { get; private set; }
 
 		public MainWindowModel()
 		{
 			Refresh();
+			RefreshThreadPoolInfo();
 		}
 
 		public void Refresh()
@@ -26,8 +30,18 @@ namespace SystemProcessorInfo
 			WmiProcessorCount = SystemInfoHelper.GetWmiPhysicalProcessorCount();
 			WmiGlobalCoreCount = SystemInfoHelper.GetWmiCoreCount();
 			WmiLogicalProcessorCount = SystemInfoHelper.GetWmiGlobalLogicalProcessorCount();
-			ProcessorGroupCount = SystemInfoHelper.GetProcessorGroupCount();
+			NumaHighestNodeNumber = SystemInfoHelper.GetNumaHighestNodeNumber();
+			ProcessorGroupCount = SystemInfoHelper.GetActiveProcessorGroupCount();
 			CSharpEnvironmentLogicalProcessorCount = Environment.ProcessorCount;
+		}
+
+		public void RefreshThreadPoolInfo()
+		{
+			int workerThreads;
+			int completionPortThreads;
+			ThreadPool.GetMaxThreads(out workerThreads, out completionPortThreads);
+			ThreadPoolMaxThreadsCountWorkerThreads = workerThreads;
+			ThreadPoolMaxThreadsCountCompletionPortThreads = completionPortThreads;
 		}
 	}
 }

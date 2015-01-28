@@ -109,7 +109,7 @@ namespace SystemProcessorInfo
 		[DllImport("kernel32.dll", SetLastError = true)]
 		private static extern bool GetNumaHighestNodeNumber(out uint count);
 
-		public static int GetProcessorGroupCount()
+		public static int GetNumaHighestNodeNumber()
 		{
 			uint processorGroup = 0;
 			try
@@ -124,6 +124,8 @@ namespace SystemProcessorInfo
 			return (int) processorGroup + 1; // Node number start ar 0
 		}
 
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern ushort GetActiveProcessorGroupCount();
 
 	}
 }
