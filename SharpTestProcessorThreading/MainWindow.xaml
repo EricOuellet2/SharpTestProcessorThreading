@@ -8,7 +8,7 @@
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
 		d:DataContext="{d:DesignInstance Type=systemProcessorInfo:MainWindowModel,IsDesignTimeCreatable=True}"
 
-		Title="MainWindow" Height="361" Width="474">
+		Title="MainWindow" Height="400" Width="600">
 
 	<Window.Resources>
 		<Style TargetType="TextBlock">
@@ -34,11 +34,13 @@
 				<RowDefinition Height="Auto"></RowDefinition>
 				<RowDefinition Height="Auto"></RowDefinition>
 				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
+				<RowDefinition Height="Auto"></RowDefinition>
 			</Grid.RowDefinitions>
 
 			<Grid.ColumnDefinitions>
-				<ColumnDefinition></ColumnDefinition>
 				<ColumnDefinition Width="Auto"></ColumnDefinition>
+				<ColumnDefinition></ColumnDefinition>
 			</Grid.ColumnDefinitions>
 
 			<TextBlock Grid.Row="0" Grid.Column="0" >Processor count (WMI)</TextBlock>
@@ -51,6 +53,7 @@
 			<TextBlock Grid.Row="7" Grid.Column="0" >Thread pool Max Threads - completionPortThreads</TextBlock>
 			<TextBlock Grid.Row="8" Grid.Column="0" >Process Affinity Mask</TextBlock>
 			<TextBlock Grid.Row="9" Grid.Column="0" >System Affinity Mask</TextBlock>
+			<TextBlock Grid.Row="10" Grid.Column="0" >Node and their associated Processor Mask</TextBlock>
 
 			<TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding WmiProcessorCount}"></TextBlock>
 			<TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding WmiGlobalCoreCount}" ></TextBlock>
@@ -62,7 +65,7 @@
 			<TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding ThreadPoolMaxThreadsCountCompletionPortThreads}"></TextBlock>
 			<TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding ProcessAffinityMask}"></TextBlock>
 			<TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding SystemAffinityMask}"></TextBlock>
-
+			<TextBlock Grid.Row="10" Grid.Column="1" Text="{Binding NumaNodeAndTheirAffinityMask}"></TextBlock>
 		</Grid>
 
 		<Grid Grid.Row="1" Grid.ColumnSpan="2">

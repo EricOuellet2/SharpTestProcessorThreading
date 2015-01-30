@@ -130,5 +130,8 @@ namespace SystemProcessorInfo
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetProcessAffinityMask(IntPtr hProcess,
 		   out UInt64 lpProcessAffinityMask, out UInt64 lpSystemAffinityMask);
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern bool GetNumaNodeProcessorMask(byte node, out UInt64 processorMask);
 	}
 }

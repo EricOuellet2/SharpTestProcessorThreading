@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SystemProcessorInfo
 {
@@ -21,7 +22,8 @@ namespace SystemProcessorInfo
 
 		public UInt64 ProcessAffinityMask { get; private set; }
 		public UInt64 SystemAffinityMask { get; private set; }
-		
+		public string NumaNodeAndTheirAffinityMask { get; private set; }
+
 		public MainWindowModel()
 		{
 			Refresh();
@@ -47,6 +49,31 @@ namespace SystemProcessorInfo
 
 			ProcessAffinityMask = processAffinityMask;
 			SystemAffinityMask = systemAffinityMask;
+
+			var sb = new StringBuilder();
+			for (int nodeIndex = 0; nodeIndex < NumaHighestNodeNumber; nodeIndex++)
+			{
+				UInt64 numaNodeProcessorMask;
+				SystemInfoHelper.GetNumaNodeProcessorMask((byte)nodeIndex, out numaNodeProcessorMask);
+				sb.Append(String.Format("Node: {0} Processor Mask: {1} (bit count: {2})", nodeIndex, numaNodeProcessorMask, GetBitCount(numaNodeProcessorMask)));
+				sb.Append(Environment.NewLine);
+			}
+
+			NumaNodeAndTheirAffinityMask = sb.ToString();
+		}
+
+		public int GetBitCount(UInt64 number)
+		{
+			int count = 0;
+			while (number != 0)
+			{
+				if ((number & 1) == 1)
+				{
+					count++;
+				}
+				number = number >> 1;
+			}
+			return count;
 		}
 
 		public void RefreshThreadPoolInfo()
