@@ -19,6 +19,9 @@ namespace SystemProcessorInfo
 		public int ThreadPoolMaxThreadsCountWorkerThreads { get; private set; }
 		public int ThreadPoolMaxThreadsCountCompletionPortThreads { get; private set; }
 
+		public UInt64 ProcessAffinityMask { get; private set; }
+		public UInt64 SystemAffinityMask { get; private set; }
+		
 		public MainWindowModel()
 		{
 			Refresh();
@@ -33,6 +36,17 @@ namespace SystemProcessorInfo
 			NumaHighestNodeNumber = SystemInfoHelper.GetNumaHighestNodeNumber();
 			ProcessorGroupCount = SystemInfoHelper.GetActiveProcessorGroupCount();
 			CSharpEnvironmentLogicalProcessorCount = Environment.ProcessorCount;
+
+			UInt64 processAffinityMask;
+			UInt64 systemAffinityMask;
+
+			SystemInfoHelper.GetProcessAffinityMask(
+				System.Diagnostics.Process.GetCurrentProcess().Handle, 
+				out processAffinityMask,
+				out systemAffinityMask);
+
+			ProcessAffinityMask = processAffinityMask;
+			SystemAffinityMask = systemAffinityMask;
 		}
 
 		public void RefreshThreadPoolInfo()
