@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using HQ.Util.General.Collections;
 
 namespace SystemProcessorInfo
 {
@@ -16,7 +17,8 @@ namespace SystemProcessorInfo
 		public int WmiLogicalProcessorCount { get; private set; }
 		public int CSharpEnvironmentLogicalProcessorCount{ get; private set; }
 		public int NumaHighestNodeNumber { get; private set; }
-		public int ProcessorGroupCount { get; private set; }
+		public int ActiveProcessorGroupCount { get; private set; }
+		public int MaximumProcessorGroupCount { get; private set; }
 		public int ThreadPoolMaxThreadsCountWorkerThreads { get; private set; }
 		public int ThreadPoolMaxThreadsCountCompletionPortThreads { get; private set; }
 
@@ -36,7 +38,8 @@ namespace SystemProcessorInfo
 			WmiGlobalCoreCount = SystemInfoHelper.GetWmiCoreCount();
 			WmiLogicalProcessorCount = SystemInfoHelper.GetWmiGlobalLogicalProcessorCount();
 			NumaHighestNodeNumber = SystemInfoHelper.GetNumaHighestNodeNumber();
-			ProcessorGroupCount = SystemInfoHelper.GetActiveProcessorGroupCount();
+			ActiveProcessorGroupCount = SystemInfoHelper.GetActiveProcessorGroupCount();
+			MaximumProcessorGroupCount = SystemInfoHelper.GetMaximumProcessorGroupCount();
 			CSharpEnvironmentLogicalProcessorCount = Environment.ProcessorCount;
 
 			UInt64 processAffinityMask;
@@ -51,7 +54,7 @@ namespace SystemProcessorInfo
 			SystemAffinityMask = systemAffinityMask;
 
 			var sb = new StringBuilder();
-			for (int nodeIndex = 0; nodeIndex < NumaHighestNodeNumber; nodeIndex++)
+			for (int nodeIndex = 0; nodeIndex <= NumaHighestNodeNumber; nodeIndex++)
 			{
 				UInt64 numaNodeProcessorMask;
 				SystemInfoHelper.GetNumaNodeProcessorMask((byte)nodeIndex, out numaNodeProcessorMask);
@@ -60,6 +63,9 @@ namespace SystemProcessorInfo
 			}
 
 			NumaNodeAndTheirAffinityMask = sb.ToString();
+
+			var structLogProcInfo = SystemInfoHelper.GetLogicalProcessorInformation();
+			
 		}
 
 		public int GetBitCount(UInt64 number)

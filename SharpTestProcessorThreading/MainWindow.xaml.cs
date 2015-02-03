@@ -38,37 +38,12 @@ namespace SystemProcessorInfo
 			int numberOfThreads = int.Parse(TextBoxThreadCount.Text);
 			int numberOfSeconds = int.Parse(TextBoxSeconds.Text);
 			bool useThreadPool = CheckBoxTestThreadPool.IsChecked == true;
-			
-			var until = DateTime.Now.AddSeconds(numberOfSeconds);
 
-			if (useThreadPool)
-			{
-				Parallel.For(0, numberOfThreads, (n) => LooseYourTime(until));
-			}
-			else
-			{
-				for (int n = 0; n < numberOfThreads; n++)
-				{
-					var thread = new Thread(() => LooseYourTime(until));
-					thread.Start();
-				}
-			}
+			var dlg = new WindowRunThread();
+			dlg.Show(numberOfThreads, numberOfSeconds * 1000, useThreadPool);
 		}
 
 		// ******************************************************************
-		private void LooseYourTime(DateTime until)
-		{
-			int i = 1;
-			while (DateTime.Now < until)
-			{
-				i = i + 1;
-				if (i > 1000000)
-				{
-					i = 0;
-				}
-			}
-		}
 
-		// ******************************************************************
 	}
 }
