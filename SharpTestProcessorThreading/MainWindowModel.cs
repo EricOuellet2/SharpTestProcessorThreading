@@ -23,7 +23,11 @@ namespace SystemProcessorInfo
 		public int ThreadPoolMaxThreadsCountCompletionPortThreads { get; private set; }
 
 		public UInt64 ProcessAffinityMask { get; private set; }
+		public string ProcessAffinityMaskString { get; private set; }
+		
 		public UInt64 SystemAffinityMask { get; private set; }
+		public string SystemAffinityMaskString { get; private set; }
+
 		public string NumaNodeAndTheirAffinityMask { get; private set; }
 
 		public MainWindowModel()
@@ -51,7 +55,9 @@ namespace SystemProcessorInfo
 				out systemAffinityMask);
 
 			ProcessAffinityMask = processAffinityMask;
+			ProcessAffinityMaskString = String.Format("{0} (bit count: {1})\r\n{2}", processAffinityMask, GetBitCount(processAffinityMask), GetBitString(processAffinityMask));
 			SystemAffinityMask = systemAffinityMask;
+			SystemAffinityMaskString = String.Format("{0} (bit count: {1})\r\n{2}", systemAffinityMask, GetBitCount(processAffinityMask), GetBitString(systemAffinityMask)); 
 
 			var sb = new StringBuilder();
 			for (int nodeIndex = 0; nodeIndex <= NumaHighestNodeNumber; nodeIndex++)
@@ -59,6 +65,8 @@ namespace SystemProcessorInfo
 				UInt64 numaNodeProcessorMask;
 				SystemInfoHelper.GetNumaNodeProcessorMask((byte)nodeIndex, out numaNodeProcessorMask);
 				sb.Append(String.Format("Node: {0} Processor Mask: {1} (bit count: {2})", nodeIndex, numaNodeProcessorMask, GetBitCount(numaNodeProcessorMask)));
+				sb.Append(Environment.NewLine);
+				sb.Append(GetBitString(numaNodeProcessorMask));
 				sb.Append(Environment.NewLine);
 			}
 
@@ -82,6 +90,29 @@ namespace SystemProcessorInfo
 			return count;
 		}
 
+		private const UInt64 Int64Lastbit = 9223372036854775808; 
+
+		public string GetBitString(UInt64 number)
+		{
+			var sb = new StringBuilder();
+			UInt64 bit = Int64Lastbit;
+
+			for(int index = 0; index < 64; index++)
+			{
+				if ((number & bit) > 0)
+				{
+					sb.Append('1');
+				}
+				else
+				{
+					sb.Append('-');
+				}
+				bit = bit >> 1;
+			}
+
+			return sb.ToString();
+		}
+		
 		public void RefreshThreadPoolInfo()
 		{
 			int workerThreads;

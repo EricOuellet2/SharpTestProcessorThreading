@@ -37,12 +37,12 @@ namespace SystemProcessorInfo
 				{
 					int localN = n;
 					var thread = new Thread(() => LooseYourTime(localN, until));
-					thread.Priority = ThreadPriority.BelowNormal;
+					thread.Priority = ThreadPriority.Lowest;
 					thread.Start();
 				}
 			}
 		}
-
+		
 		private int _threadCount = 0;
 
 		// ******************************************************************
@@ -66,7 +66,7 @@ namespace SystemProcessorInfo
 			while (DateTime.Now < until)
 			{
 				i = i + 1;
-				if (i > 10000)
+				if (i > 100000)
 				{
 					i = 0;
 

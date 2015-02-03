@@ -39,7 +39,11 @@ namespace SystemProcessorInfo
 			return processorCount;
 		}
 
-		public static int GetWmiCoreCount() // It one show 1 core when running on virutal machine
+		/// <summary>
+		/// Per processor
+		/// </summary>
+		/// <returns></returns>
+		public static int GetWmiCoreCount() 
 		{
 			var searcherCoreCount = new ManagementObjectSearcher("Select * from Win32_Processor");
 			int coreCount = -1;
@@ -76,6 +80,10 @@ namespace SystemProcessorInfo
 		//	return coreCount;
 		//}
 
+		/// <summary>
+		/// Global
+		/// </summary>
+		/// <returns></returns>
 		public static int GetWmiGlobalLogicalProcessorCount()
 		{
 			var searcherCpuCount = new ManagementObjectSearcher("Select * from Win32_ComputerSystem");

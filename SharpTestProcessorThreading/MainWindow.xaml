@@ -14,9 +14,12 @@
 		<Style TargetType="TextBlock">
 			<Setter Property="Margin" Value="0,3,0,7"></Setter>
 		</Style>
+		<Style TargetType="TextBox">
+			<Setter Property="IsReadOnly" Value="True"></Setter>
+		</Style>
 	</Window.Resources>
 
-	<Grid>
+	<Grid Margin="7">
 		<Grid.RowDefinitions>
 			<RowDefinition></RowDefinition>
 			<RowDefinition Height="Auto"></RowDefinition>
@@ -48,30 +51,30 @@
 			</Grid.ColumnDefinitions>
 
 			<TextBlock Grid.Row="0" Grid.Column="0" >Processor count (WMI)</TextBlock>
-			<TextBlock Grid.Row="1" Grid.Column="0" >Global core count (WMI)</TextBlock>
+			<TextBlock Grid.Row="1" Grid.Column="0" >Core count/processor (WMI)</TextBlock>
 			<TextBlock Grid.Row="2" Grid.Column="0" >Global logical processors (WMI)</TextBlock>
 			<TextBlock Grid.Row="3" Grid.Column="0" >Global logical processors (Environment.LogicalProcessorCount)</TextBlock>
-			<TextBlock Grid.Row="4" Grid.Column="0" >Active Processor group count (pinvoke kernel32)")</TextBlock>
-			<TextBlock Grid.Row="5" Grid.Column="0" >Maximum Processor group count (pinvoke kernel32)")</TextBlock>
-			<TextBlock Grid.Row="6" Grid.Column="0" >Highest Numa Node Number (pinvoke kernel32 - start at 0)")</TextBlock>
+			<TextBlock Grid.Row="4" Grid.Column="0" >Active Processor group count (pinvoke kernel32)</TextBlock>
+			<TextBlock Grid.Row="5" Grid.Column="0" >Maximum Processor group count (pinvoke kernel32)</TextBlock>
+			<TextBlock Grid.Row="6" Grid.Column="0" >Highest Numa Node Number (pinvoke kernel32)    0 Based</TextBlock>
 			<TextBlock Grid.Row="7" Grid.Column="0" >Thread pool Max Threads - workerThreads</TextBlock>
 			<TextBlock Grid.Row="8" Grid.Column="0" >Thread pool Max Threads - completionPortThreads</TextBlock>
 			<TextBlock Grid.Row="9" Grid.Column="0" >Process Affinity Mask (pinvoke kernel32)</TextBlock>
 			<TextBlock Grid.Row="10" Grid.Column="0" >System Affinity Mask (pinvoke kernel32)</TextBlock>
-			<TextBlock Grid.Row="11" Grid.Column="0" >All nodes and their associated Processor Mask (pinvoke kernel32)</TextBlock>
+			<TextBlock Grid.Row="11" Grid.Column="0" >All NUMA nodes and their associated Processor Mask (pinvoke kernel32)</TextBlock>
 
-			<TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding WmiProcessorCount}"></TextBlock>
-			<TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding WmiGlobalCoreCount}" ></TextBlock>
-			<TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding WmiLogicalProcessorCount}"></TextBlock>
-			<TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding CSharpEnvironmentLogicalProcessorCount}"></TextBlock>
-			<TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding ActiveProcessorGroupCount}"></TextBlock>
-			<TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding MaximumProcessorGroupCount}"></TextBlock>
-			<TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding NumaHighestNodeNumber}"></TextBlock>
-			<TextBlock Grid.Row="7" Grid.Column="2" Text="{Binding ThreadPoolMaxThreadsCountWorkerThreads}"></TextBlock>
-			<TextBlock Grid.Row="8" Grid.Column="2" Text="{Binding ThreadPoolMaxThreadsCountCompletionPortThreads}"></TextBlock>
-			<TextBlock Grid.Row="9" Grid.Column="2" Text="{Binding ProcessAffinityMask}"></TextBlock>
-			<TextBlock Grid.Row="10" Grid.Column="2" Text="{Binding SystemAffinityMask}"></TextBlock>
-			<TextBlock Grid.Row="11" Grid.Column="2" Text="{Binding NumaNodeAndTheirAffinityMask}"></TextBlock>
+			<TextBox Grid.Row="0" Grid.Column="2" Text="{Binding WmiProcessorCount, Mode=OneWay}"></TextBox>
+			<TextBox Grid.Row="1" Grid.Column="2" Text="{Binding WmiGlobalCoreCount, Mode=OneWay}" ></TextBox>
+			<TextBox Grid.Row="2" Grid.Column="2" Text="{Binding WmiLogicalProcessorCount, Mode=OneWay}"></TextBox>
+			<TextBox Grid.Row="3" Grid.Column="2" Text="{Binding CSharpEnvironmentLogicalProcessorCount, Mode=OneWay}"></TextBox>
+			<TextBox Grid.Row="4" Grid.Column="2" Text="{Binding ActiveProcessorGroupCount, Mode=OneWay}"></TextBox>
+			<TextBox Grid.Row="5" Grid.Column="2" Text="{Binding MaximumProcessorGroupCount, Mode=OneWay}"></TextBox>
+			<TextBox Grid.Row="6" Grid.Column="2" Text="{Binding NumaHighestNodeNumber, Mode=OneWay}"></TextBox>
+			<TextBox Grid.Row="7" Grid.Column="2" Text="{Binding ThreadPoolMaxThreadsCountWorkerThreads, Mode=OneWay}"></TextBox>
+			<TextBox Grid.Row="8" Grid.Column="2" Text="{Binding ThreadPoolMaxThreadsCountCompletionPortThreads, Mode=OneWay}"></TextBox>
+			<TextBox Grid.Row="9" Grid.Column="2" Text="{Binding ProcessAffinityMaskString, Mode=OneWay}" FontFamily="Courier New"></TextBox>
+			<TextBox Grid.Row="10" Grid.Column="2" Text="{Binding SystemAffinityMaskString, Mode=OneWay}" FontFamily="Courier New"></TextBox>
+			<TextBox Grid.Row="11" Grid.Column="2" Text="{Binding NumaNodeAndTheirAffinityMask, Mode=OneWay}" FontFamily="Courier New"></TextBox>
 		</Grid>
 
 		<Grid Grid.Row="1" Grid.ColumnSpan="2">
