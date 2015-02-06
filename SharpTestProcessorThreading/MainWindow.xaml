@@ -14,9 +14,6 @@
 		<Style TargetType="TextBlock">
 			<Setter Property="Margin" Value="0,3,0,7"></Setter>
 		</Style>
-		<Style TargetType="TextBox">
-			<Setter Property="IsReadOnly" Value="True"></Setter>
-		</Style>
 	</Window.Resources>
 
 	<Grid Margin="7">
@@ -26,6 +23,11 @@
 		</Grid.RowDefinitions>
 
 		<Grid>
+			<Grid.Resources>
+				<Style TargetType="TextBox">
+					<Setter Property="IsReadOnly" Value="True"></Setter>
+				</Style>
+			</Grid.Resources>
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto"></RowDefinition>
 				<RowDefinition Height="Auto"></RowDefinition>

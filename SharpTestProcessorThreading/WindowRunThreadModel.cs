@@ -12,9 +12,49 @@ namespace SystemProcessorInfo
 	{
 		public CollectionMtWithAsyncObservableCollectionReadOnlyCopy<ThreadInfo> CollThreadInfo { get; set; }
 
-		public int NumberOfThread {get; set;}
-		public double Millisecs { get; set; }
-		public bool UseThreadPool { get; set; }
+
+		private int _numberOfThread;
+		public int NumberOfThread
+		{
+			get { return _numberOfThread; }
+			set
+			{
+				if (_numberOfThread != value)
+				{
+					_numberOfThread = value;
+					NotifyPropertyChanged(()=>NumberOfThread);
+				}
+			}
+		}
+
+		private double _millisecs;
+		public double Millisecs
+		{
+			get { return _millisecs; }
+			set
+			{
+				if (_millisecs != value)
+				{
+					_millisecs = value;
+					NotifyPropertyChanged(()=>Millisecs);
+				}
+			}
+		}
+
+		private bool _useThreadPool = false;
+
+		public bool UseThreadPool
+		{
+			get { return _useThreadPool; }
+			set
+			{
+				if (_useThreadPool != value)
+				{
+					_useThreadPool = value;
+					NotifyPropertyChanged(()=>UseThreadPool);
+				}
+			}
+		}
 
 		// ******************************************************************
 		public WindowRunThreadModel()
