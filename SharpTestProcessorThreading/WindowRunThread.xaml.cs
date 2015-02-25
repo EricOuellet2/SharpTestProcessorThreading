@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace SystemProcessorInfo
 {
@@ -37,6 +38,22 @@ namespace SystemProcessorInfo
 			Task.Run(()=>Model.StartThreads());
 
 			this.Show();
+
+			Dispatcher.BeginInvoke(new Action(UpdateStatus), DispatcherPriority.ContextIdle);
+		}
+
+		private async void UpdateStatus()
+		{
+			this.MyDataGrid.ItemsSource = Model.CollThreadInfo.ToArray();
+
+			await Task.Delay(1000);
+
+			if (Model.IsRunning)
+			{
+				Dispatcher.BeginInvoke(new Action(
+					() => Dispatcher.BeginInvoke(new Action(UpdateStatus), DispatcherPriority.Background)
+					), DispatcherPriority.ContextIdle);
+			}
 		}
 
 		public WindowRunThreadModel Model

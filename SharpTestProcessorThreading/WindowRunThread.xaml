@@ -9,6 +9,6 @@
 		
         Title="Thread" Height="1000" Width="600">
 	<Grid>
-		<DataGrid ItemsSource="{Binding CollThreadInfo.ObsColl}" AutoGeneratingColumn="DataGridOnAutoGeneratingColumn"/>
+		<DataGrid Name="MyDataGrid" ItemsSource="{Binding CollThreadInfo}" AutoGeneratingColumn="DataGridOnAutoGeneratingColumn"/>
 	</Grid>
 </Window>

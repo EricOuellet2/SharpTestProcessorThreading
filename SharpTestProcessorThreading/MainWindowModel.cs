@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,7 @@ namespace SystemProcessorInfo
 		public int CSharpEnvironmentLogicalProcessorCount{ get; private set; }
 		public int NumaHighestNodeNumber { get; private set; }
 		public int ActiveProcessorGroupCount { get; private set; }
+		public string LogicalProcessorCountPerGroup { get; set; }
 		public int MaximumProcessorGroupCount { get; private set; }
 		public int ThreadPoolMaxThreadsCountWorkerThreads { get; private set; }
 		public int ThreadPoolMaxThreadsCountCompletionPortThreads { get; private set; }
@@ -43,23 +45,59 @@ namespace SystemProcessorInfo
 			WmiLogicalProcessorCount = SystemInfoHelper.GetWmiGlobalLogicalProcessorCount();
 			NumaHighestNodeNumber = SystemInfoHelper.GetNumaHighestNodeNumber();
 			ActiveProcessorGroupCount = SystemInfoHelper.GetActiveProcessorGroupCount();
+
+			var sb = new StringBuilder();
+			for(UInt16 groupIndex = 0; groupIndex < ActiveProcessorGroupCount; groupIndex++)
+			{
+				if (sb.Length > 0)
+				{
+					sb.AppendLine();
+				}
+
+				sb.AppendFormat("Group '{0}' as ", groupIndex);
+
+				UInt32 processorCount = SystemInfoHelper.GetActiveProcessorCount(groupIndex);
+				if (processorCount == 0)
+				{
+					sb.AppendFormat("Error reading GetActiveProcessorCount: {0}", Marshal.GetLastWin32Error());
+				}
+				else
+				{
+					sb.AppendFormat("{0} Logical Processors", processorCount);
+				}
+			}
+			
+			LogicalProcessorCountPerGroup = sb.ToString();
+
 			MaximumProcessorGroupCount = SystemInfoHelper.GetMaximumProcessorGroupCount();
 			CSharpEnvironmentLogicalProcessorCount = Environment.ProcessorCount;
 
 			UInt64 processAffinityMask;
 			UInt64 systemAffinityMask;
 
-			SystemInfoHelper.GetProcessAffinityMask(
+			bool isResultOk = SystemInfoHelper.GetProcessAffinityMask(
 				System.Diagnostics.Process.GetCurrentProcess().Handle, 
 				out processAffinityMask,
 				out systemAffinityMask);
 
-			ProcessAffinityMask = processAffinityMask;
-			ProcessAffinityMaskString = String.Format("{0} (bit count: {1})\r\n{2}", processAffinityMask, GetBitCount(processAffinityMask), GetBitString(processAffinityMask));
-			SystemAffinityMask = systemAffinityMask;
-			SystemAffinityMaskString = String.Format("{0} (bit count: {1})\r\n{2}", systemAffinityMask, GetBitCount(processAffinityMask), GetBitString(systemAffinityMask)); 
+			if (isResultOk)
+			{
+				ProcessAffinityMask = processAffinityMask;
+				ProcessAffinityMaskString = String.Format("{0} (bit count: {1})\r\n{2}", processAffinityMask,
+					GetBitCount(processAffinityMask), GetBitString(processAffinityMask));
+				SystemAffinityMask = systemAffinityMask;
+				SystemAffinityMaskString = String.Format("{0} (bit count: {1})\r\n{2}", systemAffinityMask,
+					GetBitCount(processAffinityMask), GetBitString(systemAffinityMask));
+			}
+			else
+			{
+				int error = Marshal.GetLastWin32Error();
 
-			var sb = new StringBuilder();
+				ProcessAffinityMaskString = "GetProcessAffinityMask() error = " + error;
+				SystemAffinityMaskString = "GetProcessAffinityMask() error = " + error;
+			}
+
+			sb.Clear();
 			for (int nodeIndex = 0; nodeIndex <= NumaHighestNodeNumber; nodeIndex++)
 			{
 				UInt64 numaNodeProcessorMask;

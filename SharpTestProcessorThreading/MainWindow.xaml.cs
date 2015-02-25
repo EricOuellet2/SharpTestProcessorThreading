@@ -44,6 +44,21 @@ namespace SystemProcessorInfo
 		}
 
 		// ******************************************************************
+		private void ButtonBaseOnClick(object sender, RoutedEventArgs e)
+		{
+			List<SystemInfoHelper.GROUP_RELATIONSHIP> groupRelationShips = SystemInfoHelper.GetLogicalProcessorInformationEx<SystemInfoHelper.GROUP_RELATIONSHIP>();
+			List<SystemInfoHelper.GROUP_RELATIONSHIP> numaRelationShips = SystemInfoHelper.GetLogicalProcessorInformationEx<SystemInfoHelper.GROUP_RELATIONSHIP>();
+			List<SystemInfoHelper.PROCESSOR_RELATIONSHIP> processorRelationShips = SystemInfoHelper.GetLogicalProcessorInformationEx<SystemInfoHelper.PROCESSOR_RELATIONSHIP>();
+			List<SystemInfoHelper.GROUP_RELATIONSHIP> cacheRelationShips = SystemInfoHelper.GetLogicalProcessorInformationEx<SystemInfoHelper.GROUP_RELATIONSHIP>();
+		}
+
+		// ******************************************************************
+		private void NonExOnClick(object sender, RoutedEventArgs e)
+		{
+			SystemInfoHelper.SYSTEM_LOGICAL_PROCESSOR_INFORMATION[] results = SystemInfoHelper.GetLogicalProcessorInformation();
+		}
+
+		// ******************************************************************
 
 	}
 }

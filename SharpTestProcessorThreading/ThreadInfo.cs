@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SystemProcessorInfo 
 {
-	public class ThreadInfo : NotifyPropertyChangedThreadSafeAsyncBase
+	public class ThreadInfo
 	{
 		// ******************************************************************
 		private int _index = 0;
@@ -23,7 +23,6 @@ namespace SystemProcessorInfo
 				if (_index != value)
 				{
 					_index = value;
-					NotifyPropertyChanged(()=>Index);
 				}
 			}
 		}
@@ -37,7 +36,6 @@ namespace SystemProcessorInfo
 				if (_threadId != value)
 				{
 					_threadId = value;
-					NotifyPropertyChanged(()=>ThreadId);
 				}
 			}
 		}
@@ -51,7 +49,6 @@ namespace SystemProcessorInfo
 				if (_processorGroup != value)
 				{
 					_processorGroup = value;
-					NotifyPropertyChanged(()=>ProcessorGroup);
 				}
 			}
 		}
@@ -65,7 +62,6 @@ namespace SystemProcessorInfo
 				if (_currentProcessorNumber != value)
 				{
 					_currentProcessorNumber = value;
-					NotifyPropertyChanged(()=>CurrentProcessorNumber);
 				}
 			}
 		}

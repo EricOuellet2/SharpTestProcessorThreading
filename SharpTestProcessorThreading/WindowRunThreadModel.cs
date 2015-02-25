@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -10,7 +12,7 @@ namespace SystemProcessorInfo
 {
 	public class WindowRunThreadModel : NotifyPropertyChangedThreadSafeAsyncBase
 	{
-		public CollectionMtWithAsyncObservableCollectionReadOnlyCopy<ThreadInfo> CollThreadInfo { get; set; }
+		public ObservableCollection<ThreadInfo> CollThreadInfo { get; set; }
 
 
 		private int _numberOfThread;
@@ -41,8 +43,8 @@ namespace SystemProcessorInfo
 			}
 		}
 
+		// ******************************************************************
 		private bool _useThreadPool = false;
-
 		public bool UseThreadPool
 		{
 			get { return _useThreadPool; }
@@ -57,15 +59,39 @@ namespace SystemProcessorInfo
 		}
 
 		// ******************************************************************
+		private bool _isRunning = false;
+		public bool IsRunning
+		{
+			get { return _isRunning; }
+			set
+			{
+				if (_isRunning != value)
+				{
+					_isRunning = value;
+					NotifyPropertyChanged(() => IsRunning);
+				}
+			}
+		}
+
+		// ******************************************************************
 		public WindowRunThreadModel()
 		{
-			CollThreadInfo  = new CollectionMtWithAsyncObservableCollectionReadOnlyCopy<ThreadInfo>();
 		}
 
 		// ******************************************************************
 		public void StartThreads()
 		{
 			var until = DateTime.Now.AddMilliseconds(Millisecs);
+
+			CollThreadInfo = new ObservableCollection<ThreadInfo>();
+
+			for (int n = 0; n < NumberOfThread; n++)
+			{
+				var ti = new ThreadInfo();
+				CollThreadInfo.Add(ti);
+			}
+
+			IsRunning = true;
 
 			if (UseThreadPool)
 			{
@@ -93,20 +119,17 @@ namespace SystemProcessorInfo
 
 			Interlocked.Increment(ref _threadCount);
 
-			var ti = new ThreadInfo
-			{
-				Index = index,
-				ThreadId = Thread.CurrentThread.ManagedThreadId,
-				CurrentProcessorNumber = processorNumber.Number,
-				ProcessorGroup = processorNumber.Group
-			};
-			CollThreadInfo.Add(ti);
+			ThreadInfo ti = CollThreadInfo[index];
+			ti.Index = index;
+			ti.ThreadId = Thread.CurrentThread.ManagedThreadId;
+			ti.CurrentProcessorNumber = processorNumber.Number;
+			ti.ProcessorGroup = processorNumber.Group;
 
 			int i = 1;
 			while (DateTime.Now < until)
 			{
 				i = i + 1;
-				if (i > 100000)
+				if (i > 10000)
 				{
 					i = 0;
 
@@ -116,6 +139,8 @@ namespace SystemProcessorInfo
 					ti.ProcessorGroup = processorNumber.Group;
 				}
 			}
+
+			IsRunning = false;
 		}
 
 		// ******************************************************************

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.CodeDom;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Management; // Require: System.Management
 using System.Runtime.InteropServices;
 
@@ -43,7 +46,7 @@ namespace SystemProcessorInfo
 		/// Per processor
 		/// </summary>
 		/// <returns></returns>
-		public static int GetWmiCoreCount() 
+		public static int GetWmiCoreCount()
 		{
 			var searcherCoreCount = new ManagementObjectSearcher("Select * from Win32_Processor");
 			int coreCount = -1;
@@ -60,25 +63,6 @@ namespace SystemProcessorInfo
 
 			return coreCount;
 		}
-
-		//public static int GetWmiLogicalProcessorCount2()
-		//{
-		//	var searcherCoreCount = new ManagementObjectSearcher("Select * from Win32_Processor");
-		//	int coreCount = -1;
-
-		//	try
-		//	{
-		//		foreach (var res in searcherCoreCount.Get())
-		//		{
-		//			coreCount = Convert.ToInt32(res["NumberOfLogicalProcessors"]);
-		//		}
-		//	}
-		//	catch (Exception)
-		//	{
-		//	}
-
-		//	return coreCount;
-		//}
 
 		/// <summary>
 		/// Global
@@ -99,7 +83,7 @@ namespace SystemProcessorInfo
 			catch (Exception)
 			{
 			}
-			
+
 			return processorCount;
 		}
 
@@ -143,6 +127,11 @@ namespace SystemProcessorInfo
 		public static extern bool GetProcessAffinityMask(IntPtr hProcess,
 		   out UInt64 lpProcessAffinityMask, out UInt64 lpSystemAffinityMask);
 
+
+		[DllImport("kernel32.dll", SetLastError = true)]
+		public static extern UInt32 GetActiveProcessorCount(UInt16 groupNumber);
+
+
 		[DllImport("kernel32.dll", SetLastError = true)]
 		public static extern bool GetNumaNodeProcessorMask(byte node, out UInt64 processorMask);
 
@@ -162,7 +151,7 @@ namespace SystemProcessorInfo
 
 		[DllImport("kernel32.dll")]
 		public static extern void GetCurrentProcessorNumberEx(ref PROCESSOR_NUMBER processorNumber);
-		
+
 
 		/// <summary>
 		/// Start: From David Hefffernan on StackOverflow: Code to get GetLogicalProcessorInformation
@@ -170,8 +159,7 @@ namespace SystemProcessorInfo
 		/// EO: I Think it is buggy: I receive 27 processor groups on a machine with 16
 		/// </summary>
 
-
-		public enum PROCESSOR_CACHE_TYPE
+		public enum PROCESSOR_CACHE_TYPE // 4
 		{
 			Unified = 0,
 			Instruction = 1,
@@ -180,43 +168,43 @@ namespace SystemProcessorInfo
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		public struct CACHE_DESCRIPTOR
+		public struct CACHE_DESCRIPTOR // 16
 		{
-			public byte Level;
-			public byte Associativity;
-			public ushort LineSize;
-			public uint Size;
-			public PROCESSOR_CACHE_TYPE Type;
+			public byte Level; // 1
+			public byte Associativity; // 1
+			public UInt16 LineSize; // 2
+			public UInt32 Size; // 4
+			public PROCESSOR_CACHE_TYPE Type; // 8
 		}
 
 		[StructLayout(LayoutKind.Sequential)]
-		public struct PROCESSORCORE
+		public struct PROCESSOR_CORE // 1
 		{
 			public byte Flags;
 		};
 
 		[StructLayout(LayoutKind.Sequential)]
-		public struct NUMANODE
+		public struct NUMA_NODE // 4
 		{
-			public uint NodeNumber;
+			public UInt32 NodeNumber;
 		}
 
 		[StructLayout(LayoutKind.Explicit)]
-		public struct SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION
+		public struct SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION // 16
 		{
 			[FieldOffset(0)]
-			public PROCESSORCORE ProcessorCore;
+			public PROCESSOR_CORE ProcessorCore; // 1
 			[FieldOffset(0)]
-			public NUMANODE NumaNode;
+			public NUMA_NODE NumaNode; // 4
 			[FieldOffset(0)]
-			public CACHE_DESCRIPTOR Cache;
+			public CACHE_DESCRIPTOR Cache; // 16
 			[FieldOffset(0)]
-			private UInt64 Reserved1;
+			private UInt64 Reserved1; // 8
 			[FieldOffset(8)]
-			private UInt64 Reserved2;
+			private UInt64 Reserved2; // 8
 		}
 
-		public enum LOGICAL_PROCESSOR_RELATIONSHIP
+		public enum LOGICAL_PROCESSOR_RELATIONSHIP // 4
 		{
 			RelationProcessorCore,
 			RelationNumaNode,
@@ -226,11 +214,207 @@ namespace SystemProcessorInfo
 			RelationAll = 0xffff
 		}
 
-		public struct SYSTEM_LOGICAL_PROCESSOR_INFORMATION
+		[StructLayout(LayoutKind.Sequential)]
+		public struct SYSTEM_LOGICAL_PROCESSOR_INFORMATION // 32
 		{
-			public UIntPtr ProcessorMask;
-			public LOGICAL_PROCESSOR_RELATIONSHIP Relationship;
-			public SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION ProcessorInformation;
+			public UIntPtr ProcessorMask; // 8
+			public LOGICAL_PROCESSOR_RELATIONSHIP Relationship; // 8
+			public SYSTEM_LOGICAL_PROCESSOR_INFORMATION_UNION ProcessorInformation; // 16
+		}
+
+		[StructLayout(LayoutKind.Sequential)] // 16
+		public struct GROUP_AFFINITY // 16
+		{
+			public UIntPtr Mask; // 8 (in x64)
+			public UInt16 Group; // 2
+			// [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+			// public UInt16[] Reserved; // 6
+			
+			public UInt16 Reserved1;
+			public UInt16 Reserved2;
+			public UInt16 Reserved3;
+		}
+
+		[StructLayout(LayoutKind.Explicit)] // 40
+		public struct PROCESSOR_RELATIONSHIP_INTERNAL
+		{
+			[FieldOffset(0)]
+			public byte Flags; // 1
+			
+			//[MarshalAs(UnmanagedType.ByValArray, SizeConst = 21)]
+			//public byte[] Reserved; // 21
+
+			[FieldOffset(22)]
+			public UInt16 GroupCount; // 2
+
+			//[FieldOffset(24)]
+			//[MarshalAs(UnmanagedType.ByValArray)] // To verify: [ANYSIZE_ARRAY]
+			//public GROUP_AFFINITY[] GroupMask; 
+		}
+
+		public struct PROCESSOR_RELATIONSHIP
+		{
+			public Byte Flags;
+			public UInt16 GroupCount;
+			public GROUP_AFFINITY[] GroupAffinity;
+		}
+
+		[StructLayout(LayoutKind.Sequential)] // 40
+		public struct NUMA_NODE_RELATIONSHIP
+		{
+			public UInt32 NodeNumber; // 4
+			//[MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+			//public byte[] Reserved; // 20
+
+			public byte Reserved01;
+			public byte Reserved02;
+			public byte Reserved03;
+			public byte Reserved04;
+			public byte Reserved05;
+			public byte Reserved06;
+			public byte Reserved07;
+			public byte Reserved08;
+			public byte Reserved09;
+			public byte Reserved10;
+			public byte Reserved11;
+			public byte Reserved12;
+			public byte Reserved13;
+			public byte Reserved14;
+			public byte Reserved15;
+			public byte Reserved16;
+			public byte Reserved17;
+			public byte Reserved18;
+			public byte Reserved19;
+			public byte Reserved20;
+
+			public GROUP_AFFINITY GroupMask; // 16
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct CACHE_RELATIONSHIP // 52
+		{
+			public byte Level; // 1
+			public byte Associativity; // 1
+			public UInt16 LineSize; // 2
+			public UInt32 CacheSize; // 4
+			public PROCESSOR_CACHE_TYPE Type; // 8
+			
+			//[MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+			//public byte[] Reserved; // 20
+
+			public byte Reserved01;
+			public byte Reserved02;
+			public byte Reserved03;
+			public byte Reserved04;
+			public byte Reserved05;
+			public byte Reserved06;
+			public byte Reserved07;
+			public byte Reserved08;
+			public byte Reserved09;
+			public byte Reserved10;
+			public byte Reserved11;
+			public byte Reserved12;
+			public byte Reserved13;
+			public byte Reserved14;
+			public byte Reserved15;
+			public byte Reserved16;
+			public byte Reserved17;
+			public byte Reserved18;
+			public byte Reserved19;
+			public byte Reserved20;
+			
+			public GROUP_AFFINITY GroupMask; // 16
+
+			public override string ToString()
+			{
+				return string.Format("Associativity: {0}, GroupMask: {1}, Level: {2}, LineSize: {3}, Type: {4}" , Associativity, GroupMask, Level, LineSize, Type);
+			}
+		}
+
+		[StructLayout(LayoutKind.Explicit)]
+		public struct PROCESSOR_GROUP_INFO // 48
+		{
+			[FieldOffset(0)]
+			public byte MaximumProcessorCount; // 1 
+			[FieldOffset(1)]
+			public byte ActiveProcessorCount; // 1
+			
+			// [MarshalAs(UnmanagedType.ByValArray, SizeConst = 38)]
+			// public byte[] Reserved; // 38
+			
+			[FieldOffset(40)]
+			public UIntPtr ActiveProcessorMask; // 8 (in x64)
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct GROUP_RELATIONSHIP_INTERNAL // 
+		{
+			public UInt16 MaximumGroupCount; // 2
+			public UInt16 ActiveGroupCount; // 2
+			
+			//[MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)]
+			//public byte[] Reserved; // 20
+
+			public byte Reserved01;
+			public byte Reserved02;
+			public byte Reserved03;
+			public byte Reserved04;
+			public byte Reserved05;
+			public byte Reserved06;
+			public byte Reserved07;
+			public byte Reserved08;
+			public byte Reserved09;
+			public byte Reserved10;
+			public byte Reserved11;
+			public byte Reserved12;
+			public byte Reserved13;
+			public byte Reserved14;
+			public byte Reserved15;
+			public byte Reserved16;
+			public byte Reserved17;
+			public byte Reserved18;
+			public byte Reserved19;
+			public byte Reserved20;
+
+			// [MarshalAs(UnmanagedType.ByValArray)] // To verify: [ANYSIZE_ARRAY]
+			// private PROCESSOR_GROUP_INFO[] GroupInfo; //	
+		}
+
+		public struct GROUP_RELATIONSHIP
+		{
+			public UInt16 MaximumGroupCount;
+			public UInt16 ActiveGroupCount; 
+			public PROCESSOR_GROUP_INFO[] GroupInfo;
+		}
+
+		[StructLayout(LayoutKind.Explicit)]
+		public struct SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX_UNION
+		{
+			//[FieldOffset(0)]
+			//public PROCESSOR_RELATIONSHIP Processor;
+			
+			//[FieldOffset(0)]
+			//public NUMA_NODE_RELATIONSHIP NumaNode;
+			
+			[FieldOffset(0)]
+			public CACHE_RELATIONSHIP Cache;
+			
+			//[FieldOffset(0)]
+			//public GROUP_RELATIONSHIP Group;
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX
+		{
+			public LOGICAL_PROCESSOR_RELATIONSHIP Relationship; // 4
+			public UInt32 Size; // 4
+			public SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX_UNION systemLogicalProcessorInformationExUnion;
+		}
+
+		public struct SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX_ROOT_INFO
+		{
+			public LOGICAL_PROCESSOR_RELATIONSHIP Relationship; // 4
+			public UInt32 Size; // 4
 		}
 
 		[DllImport(@"kernel32.dll", SetLastError = true)]
@@ -272,6 +456,166 @@ namespace SystemProcessorInfo
 			return null;
 		}
 
+		[DllImport("kernel32.dll", SetLastError = true)]
+		private static extern bool GetLogicalProcessorInformationEx(
+			LOGICAL_PROCESSOR_RELATIONSHIP relationshipType,
+			IntPtr buffer,
+			ref UInt32 returnedLength);
+
+		// EO 2015-02-16, Function has been added by me. ~Copied from GetLogicalProcessorInformation() from David Heffernan 
+		public static List<T> GetLogicalProcessorInformationEx<T>() where T : struct
+		{
+			LOGICAL_PROCESSOR_RELATIONSHIP relationShip;
+
+			if (typeof(T) == typeof (CACHE_RELATIONSHIP))
+			{
+				relationShip = LOGICAL_PROCESSOR_RELATIONSHIP.RelationCache;
+			}
+			else if (typeof(T) == typeof(GROUP_RELATIONSHIP))
+			{
+				relationShip = LOGICAL_PROCESSOR_RELATIONSHIP.RelationGroup;
+			}
+			else if (typeof(T) == typeof(PROCESSOR_RELATIONSHIP))
+			{
+				relationShip = LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore;
+			}
+			else if (typeof(T) == typeof(NUMA_NODE_RELATIONSHIP))
+			{
+				relationShip = LOGICAL_PROCESSOR_RELATIONSHIP.RelationNumaNode;
+			}
+			else
+			{
+				throw new NotSupportedException("This type of relation is currently unsuported");
+			}
+
+
+			var listRelationShip = new List<T>();
+
+			SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX systemLogicalProcessorInformationEx;
+			UInt32 ReturnLength = 0;
+			bool isOk = GetLogicalProcessorInformationEx(relationShip, IntPtr.Zero, ref ReturnLength);
+			int error = Marshal.GetLastWin32Error();
+			if (error == ERROR_INSUFFICIENT_BUFFER)
+			{
+				IntPtr Ptr = Marshal.AllocHGlobal((int)ReturnLength);
+				try
+				{
+					int size = 0;
+
+					if (GetLogicalProcessorInformationEx(relationShip, Ptr, ref ReturnLength))
+					{
+						var sizeLeftToRead = (Int32)ReturnLength;
+
+						IntPtr nextItem = IntPtr.Zero;
+						while (sizeLeftToRead > 0)
+						{
+							var structInfo =
+								(SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX_ROOT_INFO)
+									Marshal.PtrToStructure(Ptr, typeof (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX_ROOT_INFO));
+
+							nextItem = Ptr + Marshal.SizeOf(typeof (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX_ROOT_INFO));
+
+							switch (structInfo.Relationship)
+							{
+								case LOGICAL_PROCESSOR_RELATIONSHIP.RelationAll:
+								{
+									throw new NotSupportedException("LOGICAL_PROCESSOR_RELATIONSHIP.RelationAll is not supported");									
+								}
+								case LOGICAL_PROCESSOR_RELATIONSHIP.RelationCache: // Checked, ok
+								{
+									var relationship = (T)Marshal.PtrToStructure(nextItem, typeof(T));
+									listRelationShip.Add(relationship);
+									break; 
+								}
+								case LOGICAL_PROCESSOR_RELATIONSHIP.RelationNumaNode: // Cheked, unsure
+								{
+									var relationship = (T)Marshal.PtrToStructure(nextItem, typeof(T));
+									listRelationShip.Add(relationship);
+									break;
+								}
+								case LOGICAL_PROCESSOR_RELATIONSHIP.RelationGroup:
+								{
+									var relationship = (GROUP_RELATIONSHIP_INTERNAL)Marshal.PtrToStructure(nextItem, typeof(GROUP_RELATIONSHIP_INTERNAL));
+
+									IntPtr processorGroupInfoPtr = nextItem + Marshal.SizeOf(typeof(GROUP_RELATIONSHIP_INTERNAL));
+
+									int groupCount = ((GROUP_RELATIONSHIP_INTERNAL)(object)relationship).ActiveGroupCount;
+									int sizeProcessorGroupInfo = Marshal.SizeOf(typeof (PROCESSOR_GROUP_INFO));
+
+									var processorGroupInfos = new PROCESSOR_GROUP_INFO[groupCount];
+
+									for (int groupIndex = 0; groupIndex < groupCount; groupIndex++)
+									{
+										var processorGroupInfo = Marshal.PtrToStructure<PROCESSOR_GROUP_INFO>(processorGroupInfoPtr);
+										processorGroupInfos[groupIndex] = processorGroupInfo;
+
+										processorGroupInfoPtr += sizeProcessorGroupInfo;
+									}
+
+									var groupRelationship = new GROUP_RELATIONSHIP();
+									groupRelationship.ActiveGroupCount = relationship.ActiveGroupCount;
+									groupRelationship.MaximumGroupCount = relationship.MaximumGroupCount;
+									groupRelationship.GroupInfo = processorGroupInfos;
+
+									listRelationShip.Add((T)(object)groupRelationship);
+
+									break;
+								}
+								case LOGICAL_PROCESSOR_RELATIONSHIP.RelationProcessorCore:
+								{
+
+									var relationship = (PROCESSOR_RELATIONSHIP_INTERNAL)Marshal.PtrToStructure(nextItem, typeof(PROCESSOR_RELATIONSHIP_INTERNAL));
+
+									IntPtr groupAffinityPtr = nextItem + Marshal.SizeOf(typeof(PROCESSOR_RELATIONSHIP_INTERNAL));
+
+									int groupCount = ((PROCESSOR_RELATIONSHIP_INTERNAL)(object)relationship).GroupCount;
+									int sizeGroupAffinity = Marshal.SizeOf(typeof (GROUP_AFFINITY));
+
+									var processorGroupAffinitys = new GROUP_AFFINITY[groupCount];
+
+									for (int groupMaskIndex = 0; groupMaskIndex < groupCount; groupMaskIndex++)
+									{
+										var groupAffinity = Marshal.PtrToStructure<GROUP_AFFINITY>(groupAffinityPtr);
+										processorGroupAffinitys[groupMaskIndex] = groupAffinity;
+
+										groupAffinityPtr += sizeGroupAffinity;
+									}
+
+
+									var processorRelationship = new PROCESSOR_RELATIONSHIP();
+									processorRelationship.Flags = relationship.Flags;
+									processorRelationship.GroupCount = relationship.GroupCount;
+									processorRelationship.GroupAffinity = processorGroupAffinitys;
+
+									listRelationShip.Add((T)(object)processorRelationship);
+
+									break;						
+								}
+							}
+
+							nextItem += (int) structInfo.Size;
+							sizeLeftToRead -= (int) structInfo.Size;
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					Debug.Print(ex.ToString());					
+				}
+				finally
+				{
+					Marshal.FreeHGlobal(Ptr);
+				}
+			}
+
+			Debug.Print("Cache");
+			foreach (T rel in listRelationShip)
+			{
+				Debug.Print(rel.ToString());
+			}
+
+			return listRelationShip;
+		}
 		// End: From David Hefffernan on StackOverflow: Code to get GetLogicalProcessorInformation
 
 
