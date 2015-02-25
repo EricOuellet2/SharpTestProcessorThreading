@@ -14,6 +14,7 @@ namespace SystemProcessorInfo
 	{
 		public ObservableCollection<ThreadInfo> CollThreadInfo { get; set; }
 
+		private Timer _timer = null;
 
 		private int _numberOfThread;
 		public int NumberOfThread
@@ -29,8 +30,8 @@ namespace SystemProcessorInfo
 			}
 		}
 
-		private double _millisecs;
-		public double Millisecs
+		private int _millisecs;
+		public int Millisecs
 		{
 			get { return _millisecs; }
 			set
@@ -83,14 +84,6 @@ namespace SystemProcessorInfo
 		{
 			var until = DateTime.Now.AddMilliseconds(Millisecs);
 
-			CollThreadInfo = new ObservableCollection<ThreadInfo>();
-
-			for (int n = 0; n < NumberOfThread; n++)
-			{
-				var ti = new ThreadInfo();
-				CollThreadInfo.Add(ti);
-			}
-
 			IsRunning = true;
 
 			if (UseThreadPool)
@@ -107,10 +100,25 @@ namespace SystemProcessorInfo
 					thread.Start();
 				}
 			}
+
+			if (_timer == null)
+			{
+				_timer = new Timer(StopTimer, null, Millisecs, Timeout.Infinite);
+			}
+			else
+			{
+				_timer.Change(Millisecs, Timeout.Infinite);
+			}
+		}
+
+		// ******************************************************************
+		private void StopTimer(object state)
+		{
+			IsRunning = false;
 		}
 		
 		private int _threadCount = 0;
-
+		
 		// ******************************************************************
 		private void LooseYourTime(int index, DateTime until)
 		{
@@ -125,22 +133,26 @@ namespace SystemProcessorInfo
 			ti.CurrentProcessorNumber = processorNumber.Number;
 			ti.ProcessorGroup = processorNumber.Group;
 
+			double x, y;
 			int i = 1;
-			while (DateTime.Now < until)
+			while (IsRunning)
 			{
 				i = i + 1;
-				if (i > 10000)
+
+				PrimeTool.IsPrime(i);
+				if (i == int.MaxValue)
 				{
 					i = 0;
-
-					ti.ThreadId = Thread.CurrentThread.ManagedThreadId;
-					SystemInfoHelper.GetCurrentProcessorNumberEx(ref processorNumber);
-					ti.CurrentProcessorNumber = processorNumber.Number;
-					ti.ProcessorGroup = processorNumber.Group;
+					x= Math.Sqrt((double)i);
+					x = x + x;
 				}
-			}
 
-			IsRunning = false;
+				ti.ThreadId = Thread.CurrentThread.ManagedThreadId;
+
+				SystemInfoHelper.GetCurrentProcessorNumberEx(ref processorNumber);
+				ti.CurrentProcessorNumber = processorNumber.Number;
+				ti.ProcessorGroup = processorNumber.Group;
+			}
 		}
 
 		// ******************************************************************

@@ -30,6 +30,8 @@ namespace SystemProcessorInfo
 			InitializeComponent();
 			Model = new MainWindowModel();
 			DataContext = Model;
+
+			this.TextBoxThreadCount.Text = Model.CSharpEnvironmentLogicalProcessorCount.ToString();
 		}
 
 		// ******************************************************************

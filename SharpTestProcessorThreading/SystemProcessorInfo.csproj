@@ -100,6 +100,7 @@
     </ApplicationDefinition>
     <Compile Include="CollectionMtWithAsyncObservableCollectionReadOnlyCopy.cs" />
     <Compile Include="NotifyPropertyChangedThreadSafeAsyncBase.cs" />
+    <Compile Include="PrimeTool.cs" />
     <Compile Include="SystemInfoHelper.cs" />
     <Compile Include="ThreadInfo.cs" />
     <Compile Include="WindowRunThread.xaml.cs">

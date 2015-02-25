@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SystemProcessorInfo 
+namespace SystemProcessorInfo
 {
-	public class ThreadInfo
+	public class ThreadInfo : NotifyPropertyChangedThreadSafeAsyncBase
 	{
 		// ******************************************************************
 		private int _index = 0;
@@ -67,6 +67,13 @@ namespace SystemProcessorInfo
 		}
 
 		// ******************************************************************
+		public void RefreshInterface()
+		{
+			this.NotifyPropertyChanged(() => ProcessorGroup);
+			this.NotifyPropertyChanged(() => CurrentProcessorNumber);
+			this.NotifyPropertyChanged(() => ThreadId);
+		}
 
+		// ******************************************************************
 	}
 }

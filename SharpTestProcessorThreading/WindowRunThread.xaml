@@ -6,7 +6,7 @@
 		xmlns:d="http://schemas.microsoft.com/expression/blend/2008"  
 		xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d"
 		d:DataContext="{d:DesignInstance Type=systemProcessorInfo:WindowRunThreadModel,IsDesignTimeCreatable=True}"
-		
+		Closed="WindowRunThreadOnClosed"
         Title="Thread" Height="1000" Width="600">
 	<Grid>
 		<DataGrid Name="MyDataGrid" ItemsSource="{Binding CollThreadInfo}" AutoGeneratingColumn="DataGridOnAutoGeneratingColumn"/>
